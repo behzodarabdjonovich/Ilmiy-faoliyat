@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: letterbot
+      POSTGRES_USER: letterbot
+      POSTGRES_PASSWORD: letterbot
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U letterbot -d letterbot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  bot:
+    build: .
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./storage:/app/storage
+    restart: unless-stopped
+volumes:
+  postgres_data:
